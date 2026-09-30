@@ -1,0 +1,478 @@
+<meta name='viewport' content='width=device-width, initial-scale=1'/><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calming Play Space</title>
+    <style>
+        :root {
+            --bg-color: #0b1329;
+            --card-bg: rgba(26, 38, 57, 0.75);
+            --text-color: #f1f5f9;
+            --subtext-color: #94a3b8;
+            --primary: #6366f1;
+            --secondary: #a855f7;
+            --accent: #38bdf8;
+            --border-radius: 20px;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0b1329 0%, #171f38 100%);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Particle Canvas Background */
+        #particleCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .container {
+            max-width: 700px;
+            width: 100%;
+            background: var(--card-bg);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            padding: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.4);
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            animation: fadeIn 0.8s ease-out;
+            z-index: 2;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
+            color: #e0e7ff;
+            margin-bottom: 6px;
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+
+        p.subtitle {
+            color: var(--subtext-color);
+            margin-bottom: 25px;
+            font-size: 1rem;
+        }
+
+        .section {
+            background: rgba(15, 23, 42, 0.45);
+            padding: 20px;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            text-align: center;
+        }
+
+        h3 {
+            margin-top: 0;
+            color: #cbd5e1;
+            font-size: 1.1rem;
+        }
+
+        /* --- GAME 1: Water Ripple Canvas --- */
+        .ripple-canvas-container {
+            position: relative;
+            width: 100%;
+            height: 180px;
+            background: rgba(10, 15, 30, 0.6);
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: pointer;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        #rippleCanvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .canvas-hint {
+            position: absolute;
+            bottom: 8px;
+            width: 100%;
+            font-size: 0.8rem;
+            color: var(--subtext-color);
+            pointer-events: none;
+        }
+
+        /* --- GAME 2: Bubble Wrap Popper --- */
+        .bubble-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+            max-width: 350px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .bubble {
+            aspect-ratio: 1;
+            background: radial-gradient(circle at 30% 30%, rgba(56, 189, 248, 0.5), rgba(99, 102, 241, 0.3));
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            cursor: pointer;
+            transition: transform 0.15s, background 0.2s, opacity 0.2s;
+        }
+
+        .bubble:hover {
+            transform: scale(1.1);
+            background: radial-gradient(circle at 30% 30%, rgba(56, 189, 248, 0.8), rgba(168, 85, 247, 0.5));
+        }
+
+        .bubble.popped {
+            transform: scale(0.1);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* --- GAME 3: Peaceful Breathing Tracker --- */
+        .breathing-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 140px;
+        }
+
+        .breathe-circle {
+            width: 90px;
+            height: 90px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 0.95rem;
+            animation: breatheAnimation 8s infinite ease-in-out;
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
+        }
+
+        @keyframes breatheAnimation {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 10px rgba(99, 102, 241, 0.3); }
+            50% { transform: scale(1.4); box-shadow: 0 0 30px rgba(168, 85, 247, 0.6); }
+        }
+
+        /* --- GAME 4: Falling Stars / Catch Toy --- */
+        .toy-container {
+            position: relative;
+            width: 100%;
+            height: 150px;
+            background: rgba(10, 15, 30, 0.6);
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: pointer;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        #toyCanvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        /* Action Buttons */
+        button.action-btn {
+            background: linear-gradient(135deg, #6366f1, #a855f7);
+            color: white;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: opacity 0.2s, transform 0.1s;
+            margin-top: 12px;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        button.action-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        /* Footer */
+        .footer-note {
+            font-size: 0.82rem;
+            color: var(--subtext-color);
+            margin-top: 20px;
+            line-height: 1.4;
+        }
+
+        .footer-note a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="particleCanvas"></canvas>
+
+    <div class="container">
+        <h1>Interactive Stress Relief</h1>
+        <p class="subtitle">Interact gently with these sensory play spaces to unwind.</p>
+
+        <!-- GAME 1: Water Ripple Sandbox -->
+        <div class="section">
+            <h3>1. Pond Ripples</h3>
+            <div class="ripple-canvas-container" id="rippleBox">
+                <canvas id="rippleCanvas"></canvas>
+                <div class="canvas-hint">Click or drag anywhere to make waves</div>
+            </div>
+        </div>
+
+        <!-- GAME 2: Bubble Wrap Popper -->
+        <div class="section">
+            <h3>2. Digital Bubble Wrap</h3>
+            <p style="font-size: 0.85rem; color: var(--subtext-color); margin-top:0;">Pop them away to clear mental static:</p>
+            <div class="bubble-grid" id="bubbleGrid">
+                <!-- Generated by JS -->
+            </div>
+            <button class="action-btn" onclick="resetBubbles()">Reset Bubbles</button>
+        </div>
+
+        <!-- GAME 3: Rhythmic Breathing Orb -->
+        <div class="section">
+            <h3>3. Rhythmic Pace Orb</h3>
+            <div class="breathing-box">
+                <div class="breathe-circle" id="breatheLabel">Inhale</div>
+            </div>
+            <p style="font-size: 0.82rem; color: var(--subtext-color); margin: 5px 0 0 0;">Match your breath to the expansion and contraction.</p>
+        </div>
+
+        <!-- GAME 4: Particle Toy -->
+        <div class="section">
+            <h3>4. Floating Light Toy</h3>
+            <div class="toy-container" id="toyBox">
+                <canvas id="toyCanvas"></canvas>
+                <div class="canvas-hint">Move your mouse or tap to guide the lights</div>
+            </div>
+        </div>
+
+        <div class="footer-note">
+            Take things one moment at a time. If you need professional support, resources like <a href="https://findahelpline.com/" target="_blank">Find A Helpline</a> are always open.
+        </div>
+    </div>
+
+    <script>
+        // --- BACKGROUND AMBIENT PARTICLES ---
+        const bgCanvas = document.getElementById('particleCanvas');
+        const bgCtx = bgCanvas.getContext('2d');
+        let bgParticles = [];
+
+        function resizeBg() {
+            bgCanvas.width = window.innerWidth;
+            bgCanvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeBg);
+        resizeBg();
+
+        for (let i = 0; i < 30; i++) {
+            bgParticles.push({
+                x: Math.random() * bgCanvas.width,
+                y: Math.random() * bgCanvas.height,
+                radius: Math.random() * 2 + 0.5,
+                speedX: (Math.random() - 0.5) * 0.3,
+                speedY: (Math.random() - 0.5) * 0.3,
+                alpha: Math.random() * 0.4 + 0.1
+            });
+        }
+
+        function drawBg() {
+            bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
+            bgParticles.forEach(p => {
+                p.x += p.speedX;
+                p.y += p.speedY;
+                if (p.x < 0) p.x = bgCanvas.width;
+                if (p.x > bgCanvas.width) p.x = 0;
+                if (p.y < 0) p.y = bgCanvas.height;
+                if (p.y > bgCanvas.height) p.y = 0;
+
+                bgCtx.beginPath();
+                bgCtx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                bgCtx.fillStyle = `rgba(56, 189, 248, ${p.alpha})`;
+                bgCtx.fill();
+            });
+            requestAnimationFrame(drawBg);
+        }
+        drawBg();
+
+
+        // --- GAME 1: RIPPLE EFFECT ---
+        const rCanvas = document.getElementById('rippleCanvas');
+        const rCtx = rCanvas.getContext('2d');
+        let ripples = [];
+
+        function resizeRippleCanvas() {
+            rCanvas.width = rCanvas.parentElement.clientWidth;
+            rCanvas.height = rCanvas.parentElement.clientHeight;
+        }
+        window.addEventListener('resize', resizeRippleCanvas);
+        resizeRippleCanvas();
+
+        function addRipple(x, y) {
+            ripples.push({ x: x, y: y, radius: 2, maxRadius: 60 + Math.random() * 40, alpha: 0.7 });
+        }
+
+        rCanvas.addEventListener('click', (e) => {
+            const rect = rCanvas.getBoundingClientRect();
+            addRipple(e.clientX - rect.left, e.clientY - rect.top);
+        });
+
+        rCanvas.addEventListener('mousemove', (e) => {
+            if (Math.random() < 0.2) { // throttle ripples on movement
+                const rect = rCanvas.getBoundingClientRect();
+                addRipple(e.clientX - rect.left, e.clientY - rect.top);
+            }
+        });
+
+        function animateRipples() {
+            rCtx.clearRect(0, 0, rCanvas.width, rCanvas.height);
+            
+            ripples.forEach((r, index) => {
+                r.radius += 1.5;
+                r.alpha *= 0.96;
+
+                if (r.alpha <= 0.01 || r.radius >= r.maxRadius) {
+                    ripples.splice(index, 1);
+                    return;
+                }
+
+                rCtx.beginPath();
+                rCtx.arc(r.x, r.y, r.radius, 0, Math.PI * 2);
+                rCtx.strokeStyle = `rgba(56, 189, 248, ${r.alpha})`;
+                rCtx.lineWidth = 1.5;
+                rCtx.stroke();
+            });
+
+            requestAnimationFrame(animateRipples);
+        }
+        animateRipples();
+
+
+        // --- GAME 2: BUBBLE WRAP ---
+        function createBubbles() {
+            const grid = document.getElementById('bubbleGrid');
+            grid.innerHTML = '';
+            for (let i = 0; i < 12; i++) {
+                const bubble = document.createElement('div');
+                bubble.className = 'bubble';
+                bubble.onclick = () => {
+                    bubble.classList.add('popped');
+                };
+                grid.appendChild(bubble);
+            }
+        }
+        function resetBubbles() {
+            createBubbles();
+        }
+        createBubbles();
+
+
+        // --- GAME 3: BREATHING TEXT SYNC ---
+        const breatheLabel = document.getElementById('breatheLabel');
+        setInterval(() => {
+            if (breatheLabel.innerText === "Inhale") {
+                breatheLabel.innerText = "Hold";
+            } else if (breatheLabel.innerText === "Hold") {
+                breatheLabel.innerText = "Exhale";
+            } else {
+                breatheLabel.innerText = "Inhale";
+            }
+        }, 4000);
+
+
+        // --- GAME 4: FLOATING LIGHT TOY ---
+        const tCanvas = document.getElementById('toyCanvas');
+        const tCtx = tCanvas.getContext('2d');
+        let lights = [];
+        let mousePos = { x: -100, y: -100 };
+
+        function resizeToyCanvas() {
+            tCanvas.width = tCanvas.parentElement.clientWidth;
+            tCanvas.height = tCanvas.parentElement.clientHeight;
+        }
+        window.addEventListener('resize', resizeToyCanvas);
+        resizeToyCanvas();
+
+        for (let i = 0; i < 15; i++) {
+            lights.push({
+                x: Math.random() * tCanvas.width,
+                y: Math.random() * tCanvas.height,
+                vx: (Math.random() - 0.5) * 1.5,
+                vy: (Math.random() - 0.5) * 1.5,
+                size: Math.random() * 4 + 2,
+                color: Math.random() > 0.5 ? '#38bdf8' : '#a855f7'
+            });
+        }
+
+        tCanvas.addEventListener('mousemove', (e) => {
+            const rect = tCanvas.getBoundingClientRect();
+            mousePos.x = e.clientX - rect.left;
+            mousePos.y = e.clientY - rect.top;
+        });
+
+        tCanvas.addEventListener('mouseleave', () => {
+            mousePos.x = -100;
+            mousePos.y = -100;
+        });
+
+        function animateToy() {
+            tCtx.clearRect(0, 0, tCanvas.width, tCanvas.height);
+
+            lights.forEach(l => {
+                // Gentle pull towards mouse if nearby
+                const dx = mousePos.x - l.x;
+                const dy = mousePos.y - l.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < 80 && dist > 5) {
+                    l.x += (dx / dist) * 0.8;
+                    l.y += (dy / dist) * 0.8;
+                }
+
+                l.x += l.vx;
+                l.y += l.vy;
+
+                if (l.x < 0 || l.x > tCanvas.width) l.vx *= -1;
+                if (l.y < 0 || l.y > tCanvas.height) l.vy *= -1;
+
+                tCtx.beginPath();
+                tCtx.arc(l.x, l.y, l.size, 0, Math.PI * 2);
+                tCtx.fillStyle = l.color;
+                tCtx.shadowBlur = 10;
+                tCtx.shadowColor = l.color;
+                tCtx.fill();
+                tCtx.shadowBlur = 0; // reset
+            });
+
+            requestAnimationFrame(animateToy);
+        }
+        animateToy();
+    </script>
+</body>
+</html>
